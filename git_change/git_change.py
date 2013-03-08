@@ -24,6 +24,7 @@ See git-change(1) for full documentation.
 """
 
 __author__ = 'jacob@nextdoor.com (Jacob Hesch)'
+__version__ = '0.1.0'  # http://semver.org/
 
 import sys
 import time
@@ -575,12 +576,28 @@ def list_change_branches():
     if not branches:
         print 'You have no change branches to list'
         return
+
+    not_merged_branches = git.run_command('git branch --no-merged', trap_stdout=True).strip().split('\n')
+    not_merged_branches = [line.strip()[7:] for line in not_merged_branches]
+
     print 'Change branches:\n'
     i = 0
     for branch in branches:
         i += 1
+
         output = git.run_command('git log --oneline -1 %s --' % branch, trap_stdout=True)
-        sys.stdout.write('{0:>2}. {1} {2}'.format(i, branch, output))
+        changeid = output.split(' ')[0]
+        description = ' '.join(output.split(' ')[1:])
+        short_branch = branch[0:16]
+        change_branch = branch.split('-')[1]
+
+        if change_branch not in not_merged_branches:  # not not == is merged
+            sys.stdout.write('\033[30m')
+
+        if change_branch == get_change_id_from_branch():
+            sys.stdout.write('\033[93m')
+        sys.stdout.write('{bid} http://c/{cid} {i:>2}: {name}'.format(i=i, bid=short_branch, cid=changeid, name=description))
+        sys.stdout.write('\033[0m')
     try:
         selection = raw_input('\nSelect a branch number to check out, '
                               'or hit enter to exit: ')
