@@ -577,7 +577,7 @@ def list_change_branches():
         print 'You have no change branches to list'
         return
 
-    not_merged_branches = git.run_command('git branch --no-merged', trap_stdout=True).strip().split('\n')
+    not_merged_branches = git.run_command('git branch --no-merged master', trap_stdout=True).strip().split('\n')
     not_merged_branches = [line.strip()[7:] for line in not_merged_branches]
 
     print 'Change branches:\n'
