@@ -591,13 +591,17 @@ def list_change_branches():
         short_branch = branch[0:16]
         change_branch = branch.split('-')[1]
 
-        if change_branch not in not_merged_branches:  # not not == is merged
+        # handle colors here
+        use_color = git.get_config_option('git-change.color')
+        use_color = (use_color != "false")  # auto or yes or anything else count as True
+        if use_color and change_branch not in not_merged_branches:  # not not == is merged
             sys.stdout.write('\033[30m')
 
-        if change_branch == get_change_id_from_branch():
+        if use_color and change_branch == get_change_id_from_branch():
             sys.stdout.write('\033[93m')
         sys.stdout.write('{bid} http://c/{cid} {i:>2}: {name}'.format(i=i, bid=short_branch, cid=changeid, name=description))
-        sys.stdout.write('\033[0m')
+        if use_color:
+            sys.stdout.write('\033[0m')
     try:
         selection = raw_input('\nSelect a branch number to check out, '
                               'or hit enter to exit: ')
